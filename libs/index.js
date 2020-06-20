@@ -7,23 +7,26 @@ exports = module.exports = XLS_json;
 // exports.XLS_json = XLS_json;
 
 function XLS_json (config, callback) {
-  if(!config.input) {
-    callback(new Error("node-xls-json: You did not provide an input file."), null);
+  if((!config.input) && (!config.data)) {
+    return callback(new Error("node-xls-json: You did not provide an input file or buffer."), null);
   }
 
   var cv = new CV(config, callback);
-  
 }
 
 function CV(config, callback) { 
-  var wb = this.load_xls(config.input)
+  var wb = (config.input) ? this.load_xls_file(config.input) : this.load_xls(config.data)
   var ws = this.ws(wb, config.sheet);
   var csv = this.csv(ws)
   this.cvjson(csv, config.output, callback, config.rowsToSkip || 0)
 }
 
-CV.prototype.load_xls = function(input) {
+CV.prototype.load_xls_file = function(input) {
   return xlsx.readFile(input);
+}
+
+CV.prototype.load_xls = function(input) {
+  return xlsx.reads(input);
 }
 
 CV.prototype.ws = function(wb, target_sheet) {
